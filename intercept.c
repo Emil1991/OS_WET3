@@ -1,17 +1,24 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/moduleparam.h>
+#include <linux/init.h>
+#include <linux/stat.h>
 #include <linux/errno.h>
 #include <linux/stddef.h>
 #include <linux/mm.h>
 #include <linux/kallsyms.h>
+#include <linux/sched.h>
 #include "kill_wrapper.h"
 
-// TODO: add more #include statements as necessary
+
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Emil Gulayev & Dennis Vashevnikov");
 
-// TODO: add command-line arguments
+static char *sValue="Bill";
+
+module_param(sValue, charp, S_IRUGO);
+MODULE_PARM_DESC(sValue, "A character string");
 
 void** sys_call_table = NULL;
 
@@ -67,8 +74,14 @@ void unplug_our_syscall(void){
 This function is called when loading the module (i.e insmod <module_name>)
 */
 int init_module(void) {
+
+    if(strcmp(sValue,"Bill")){
+        printk("cant kill Bill");
+        return 0;
+    }
     sys_call_table = (void**)kallsyms_lookup_name("sys_call_table");
     plug_our_syscall();
+    return 1;
 }
 
 void cleanup_module(void) {
