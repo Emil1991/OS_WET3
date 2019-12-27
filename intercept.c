@@ -1,9 +1,10 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/kallsyms.h>
 // TODO: add more #include statements as necessary
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("YOUR NAMES")
+MODULE_AUTHOR("Emil Gulayev & Dennis Vashevnikov");
 
 // TODO: add command-line arguments
 
@@ -49,6 +50,8 @@ This function is called when loading the module (i.e insmod <module_name>)
 */
 int init_module(void) {
    // TODO: complete the function
+    sys_call_table = (unsigned long**)kallsyms_lookup_name("sys_call_table");
+
 }
 
 void cleanup_module(void) {
