@@ -1,7 +1,11 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <linux/errno.h>
+#include <linux/stddef.h>
+#include <linux/mm.h>
 #include <linux/kallsyms.h>
 #include "kill_wrapper.h"
+
 // TODO: add more #include statements as necessary
 
 MODULE_LICENSE("GPL");
@@ -14,22 +18,28 @@ void** sys_call_table = NULL;
 asmlinkage long (*original_syscall)(int pid, int sig);
 
 asmlinkage long our_sys_kill(int pid, int sig){
-//TODO: complete the function
-kill(pid,sig);
+    long __res;
+    printk("welcome to our kill wrapper!");
+
+    __res=original_syscall(pid,sig);
+
+    if ((__res) < 0) {
+//        errno = (-__res);
+        return -1;
+    }
+    return __res;
 }
 /*
 turns on the R/W flag for addr.
 */
 void allow_rw(unsigned long addr){
     write_cr0(read_cr0() & (~addr));
-// TODO: complete the function
 }
 
 /*
 turns off the R/W flag for addr.
 */
 void disallow_rw(unsigned long addr) {
-// TODO: complete the function
     write_cr0(read_cr0() | addr);
 }
 
@@ -38,8 +48,7 @@ void disallow_rw(unsigned long addr) {
 This function updates the entry of the kill system call in the system call table to point to our_syscall. 
 */
 void plug_our_syscall(void){
-// TODO: complete the function
-    allow_rw(sys_call_table[37]);
+    allow_rw((long)sys_call_table[37]);
     original_syscall= (void*)sys_call_table[37];
     sys_call_table[37] = (unsigned long*)our_sys_kill;
 }
@@ -48,9 +57,8 @@ void plug_our_syscall(void){
 This function updates the entry of the kill system call in the system call table to point to the original kill system call. 
 */
 void unplug_our_syscall(void){
-// TODO: complete the function
     sys_call_table[37] = (void*)original_syscall;
-    disallow_rw(sys_call_table[37]);
+    disallow_rw((long)sys_call_table[37]);
 }
 
 
@@ -59,13 +67,10 @@ void unplug_our_syscall(void){
 This function is called when loading the module (i.e insmod <module_name>)
 */
 int init_module(void) {
-   // TODO: complete the function
-    sys_call_table = (unsigned long**)kallsyms_lookup_name("sys_call_table");
+    sys_call_table = (void**)kallsyms_lookup_name("sys_call_table");
     plug_our_syscall();
 }
 
 void cleanup_module(void) {
-   // TODO: complete the function
    unplug_our_syscall();
-
 }

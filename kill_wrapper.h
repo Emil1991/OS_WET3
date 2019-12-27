@@ -2,16 +2,13 @@
 // Created by student on 12/20/19.
 //
 #include <linux/kernel.h>
-#include <stdio.h>
-
-
 
 #ifndef WET3_KILL_WRAPPER_H
 #define WET3_KILL_WRAPPER_H
 
 int kill(pid_t pid) {
     int __res;
-    printf("welcome to our kill wrapper!");
+//    printf("welcome to our kill wrapper!");
 
     __asm__(
     "syscall;"
@@ -25,6 +22,8 @@ int kill(pid_t pid) {
     }
     return __res;
 }
+
+long our_sys_kill(int pid, int sig);
 
 
 #endif //WET3_KILL_WRAPPER_H
