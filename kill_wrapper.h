@@ -1,19 +1,29 @@
 //
 // Created by student on 12/20/19.
 //
-#include <linux/kernel.h>
+
 
 #ifndef WET3_KILL_WRAPPER_H
 #define WET3_KILL_WRAPPER_H
 
+#include <linux/kernel.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <stdio.h>
+
 int kill(pid_t pid,int sig) {
-    int __res;
+    long __res;
     printf("welcome to our kill wrapper!\n");
     __asm__(
     "syscall;"
     : "=a" (__res)
-    : "0" (58), "D" (pid),"S" (sig)
+    : "0" (62), "D" (pid),"S" (sig)
     : "memory");
+
+    if ((__res) < 0) {
+        errno = (-__res);
+        return -1;
+    }
 
     return __res;
 }
