@@ -39,17 +39,16 @@ asmlinkage long (*original_syscall)(int pid, int sig);
 asmlinkage long our_sys_kill(int pid, int sig){
     struct task_struct* tsk= pid_task(find_vpid(pid), PIDTYPE_PID);
     printk("*tsk:%lu\n",(unsigned long)tsk);
-    char *name= tsk->comm;
+//    char *name= tsk->comm;
     printk("welcome to our kill wrapper!\n");
-    printk("this is the comm:%s\n",name);
+    printk("this is the comm:%s\n",tsk->comm);
 
-    if((strcmp(program_name,"Bill")==0 || strcmp(program_name,name)==0) && sig==9){
+    if((strcmp(tsk->comm,"Bill")==0 || strcmp(program_name,tsk->comm)==0) && sig==9){
         printk("cant kill Bill");
         return -EPERM;
     }
-
-    return (*original_syscall)(pid,sig);
-
+return 0;
+//    return (long)(*original_syscall)(pid,sig);
 }
 /*
 turns on the R/W flag for addr.
@@ -104,12 +103,14 @@ void plug_our_syscall(void){
     original_syscall= (void*)sys_call_table[58];
     sys_call_table[58] = (unsigned long*)our_sys_kill;
     printk("plugedIn\n");
+    disallow_rw((unsigned long)sys_call_table[58]);
 }
 
 /*
 This function updates the entry of the kill system call in the system call table to point to the original kill system call. 
 */
 void unplug_our_syscall(void){
+    allow_rw((unsigned long)sys_call_table[58]);
     sys_call_table[58] = (void*)original_syscall;
     disallow_rw((unsigned long)sys_call_table[58]);
 }
