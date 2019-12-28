@@ -14,6 +14,7 @@
 #include <linux/ctype.h>
 #include <linux/kern_levels.h>
 #include <linux/init.h>
+#include <linux/mm_types_task.h>
 //#include <asm/system.h>
 #include <asm/uaccess.h>
 //#include "kill_wrapper.h"
@@ -28,23 +29,24 @@ char *program_name="Bill";
 module_param(program_name, charp, S_IRUGO);
 MODULE_PARM_DESC(program_name, "A character string");
 
+struct task_struct;
+struct pid_t;
+
 unsigned long** sys_call_table = NULL;
 
 asmlinkage long (*original_syscall)(int pid, int sig);
 
 asmlinkage long our_sys_kill(int pid, int sig){
-    struct task_struct *tsk = pid_task(find_vpid(pid), PIDTYPE_PID);
-//    struct task_struct *tsk = find_task_by_vpid(pid);
-
+    struct task_struct* tsk= pid_task(find_vpid(pid), PIDTYPE_PID);
     printk("*tsk:%lu\n",(unsigned long)tsk);
-//    char *name= tsk->comm;
+    char *name= tsk->comm;
     printk("welcome to our kill wrapper!\n");
-//    printk("this is the comm:%s\n",name);
+    printk("this is the comm:%s\n",name);
 
-//    if((strcmp(program_name,"Bill")==0 ||strcmp(program_name,name)==0) && sig==9){
-//        printk("cant kill Bill");
-//        return -EPERM;
-//    }
+    if((strcmp(program_name,"Bill")==0 || strcmp(program_name,name)==0) && sig==9){
+        printk("cant kill Bill");
+        return -EPERM;
+    }
 
     return (*original_syscall)(pid,sig);
 
