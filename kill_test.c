@@ -214,6 +214,8 @@ void testcase2_3(bool is_module_in, bool is_prog_name)
                 if(errno != EPERM)
                 {
                     FAIL_ERRVAL("sending sigkill", EPERM, errno);
+                    printf("the program name:%s,the sig:%d,is_module_in?%d,is_prog_name:%d\n",
+                                                program_name,SIGKILL,is_module_in,is_prog_name);
                 }
             }
             else

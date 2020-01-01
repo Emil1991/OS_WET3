@@ -7,12 +7,13 @@
 #define WET3_KILL_WRAPPER_H
 
 #include <linux/kernel.h>
-#include <sys/types.h>
+#include <linux/types.h>
 #include <errno.h>
 #include <stdio.h>
+#include <sched.h>
 
 int kill(pid_t pid,int sig) {
-    long __res;
+    int __res;
     printf("welcome to our kill wrapper!\n");
     __asm__(
     "syscall;"
@@ -22,7 +23,7 @@ int kill(pid_t pid,int sig) {
 
     if ((__res) < 0) {
         errno = (-__res);
-        return -1;
+//        return -1;
     }
 
     return __res;
