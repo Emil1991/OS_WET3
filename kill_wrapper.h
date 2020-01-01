@@ -23,7 +23,7 @@ int kill(pid_t pid,int sig) {
 
     if ((__res) < 0) {
         errno = (-__res);
-//        return -1;
+        return -1;
     }
 
     return __res;
